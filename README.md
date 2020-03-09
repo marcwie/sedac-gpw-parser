@@ -1,4 +1,4 @@
-A collection of scipts to work with high resolution gridded population data from the Socioeconomic Data and Applications Center (sedac).
+A collection of scipts to work with high resolution gridded population data from the Socioeconomic Data and Applications Center (sedac). This is work in progress and updated frequently.
 
 # Usage
 

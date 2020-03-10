@@ -38,6 +38,6 @@ https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-national-identifi
 
     The first line as a header. In each following line:
     
-        - The first entry is the id of the corresponding input file
-        - The second entry is the line number that contains relevant data (starting from 0 after the file header)
-        - All following entries are pairs of lower (inclusive) and upper bounds (exclusive) for ranges of column numbers. For example `1,3 6,7, 8,10` would correspond to column numbers `1,2,6,8,9`.
+    - The first entry is the id of the corresponding input file
+    - The second entry is the line number that contains relevant data (starting from 0 after the file header)
+    - All following entries are pairs of lower (inclusive) and upper bounds (exclusive) for ranges of column numbers. For example `1,3 6,7, 8,10` would correspond to column numbers `1,2,6,8,9`.

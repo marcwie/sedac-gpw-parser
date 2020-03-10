@@ -1,18 +1,66 @@
 #!/usr/bin/env python3
-import numpy as np
+"""
+Find coordinates of valid entries in each file for all countries.
+
+The script assumes that you have generated the country-file index using
+create_file_index.py.
+
+This script parses for each country the relevant input files and generates a
+lookup table that contains those lines and columns in each file that hold valid
+data.
+
+The generated output files (one per country) display the following format:
+
+#file_id, line_number, column_numbers
+1 2206 77,101
+1 2207 72,106 108,112 114,119
+1 2208 56,59 71,102 107,135
+1 2209 52,60 76,81 84,94 95,102 106,122 124,139 140,149
+...
+4 5706 4873,4895
+4 5707 4873,4894
+4 5708 4874,4893
+4 5709 4875,4893
+4 5710 4876,4892
+
+The first line is a header. In each following line:
+- The first entry is the id of the corresponding input file
+- The second entry is the line number that contains relevant data (starting
+  from 0 after the file header)
+- All following entries are pairs of lower (inclusive) and upper bounds
+  (exclusive) for ranges of column numbers. For example `1,3 6,7, 8,10` would
+  correspond to column numbers `1,2,6,8,9`.
+"""
 import os
+import numpy as np
 
 GRID_DATA = "gpw-v4-national-identifier-grid-rev11_30_sec_asc/"\
         "gpw_v4_national_identifier_grid_rev11_30_sec_{0}.asc"
 
 def parse_files(country_id, file_ids):
-    
+    """Go through the grid-files in the population data and find valid data
+    points that represent a country.
+
+    Parameters
+    ----------
+    country_id : int
+        the id of the considered country
+    file_ids : list of int
+        the file ids (1,2,...,8) the contain data on the country
+
+    Returns
+    -------
+    dic
+        a special dictionary with file ids as keys and dictionaries as
+        values. those dictinonaries contain line numbers as keys and lists of
+        corresponing column numbers as values
+    """
     coords = {}
-    
+
     for file_id in file_ids:
 
         with open(GRID_DATA.format(file_id)) as infile:
-           
+
             file_coords = {}
 
             # Itereate over the header and print the content
@@ -20,17 +68,17 @@ def parse_files(country_id, file_ids):
                 print(infile.readline()[:-1])
 
             # Iterate over each line containing data
-            for y in range(10800):
-                
-                print(y, end="\r")
+            for line_id in range(10800):
+
+                print(line_id, end="\r")
                 line = infile.readline()
                 if " {0} ".format(country_id) in line:
                     line = line.split(" ")
                     assert line[0] != ""
                     assert line[-1] == "\n"
                     assert len(line) == 10801
-                    x = [_x for _x in range(10800) if line[_x] == str(country_id)]
-                    file_coords[y] = x
+                    column_ids = [_x for _x in range(10800) if line[_x] == str(country_id)]
+                    file_coords[line_id] = column_ids
 
             # Check that all lines have really been read
             assert infile.readline() == ""
@@ -41,6 +89,11 @@ def parse_files(country_id, file_ids):
 
 
 def load_file_index():
+    """Load the list of file ids per country.
+
+    This lust must be generated before calling the script by using
+    create_file_index.py
+    """
 
     with open("output/file_index.txt", "r") as infile:
         infile.readline()
@@ -48,18 +101,41 @@ def load_file_index():
         for line in infile.readlines():
             country_id, file_list = line.split(" ")
             file_index[int(country_id)] = file_list[:-1].split(",")
-    
+
     return file_index
 
 
 def create_ranges(array):
+    """
+    Compress a list of integers but only storing the start (inclusive) and end
+    (exclusive) point of sequential values.
+
+    Parameters
+    ----------
+    array : list of int
+        A list of monotonically increasing integers
+
+    Returns
+    -------
+    str:
+        A string that contains the ranges of sequential integers in the input
+        list
+
+    Usage
+    -----
+    >>> create_ranges([0,1,3,4,5,8])
+    '0,2 3,6 8,9'
+
+    >>> create_ranges([0,3,4,5,8,9,13,14,15])
+    '0,1 3,6 8,10 13,16'
+    """
 
     mask = np.diff(array) != 1
     upper_bounds = np.array(array[:-1])[mask]
     lower_bounds = np.array(array[1:])[mask]
     lower_bounds = np.append(np.min(array), lower_bounds)
     upper_bounds = np.append(upper_bounds, np.max(array)) + 1
-    
+
     lower_bounds = lower_bounds.astype(int)
     upper_bounds = upper_bounds.astype(int)
 
@@ -74,10 +150,24 @@ def create_ranges(array):
     return outstring
 
 
-def write_output_file(country_id, coords, outfile_name):
+def write_output_file(coords, outfile_name):
+    """
+    Save the coordinates of valid data points for a given country into a file.
+
+    The format of the file is designed such that the storage size on the disk
+    is minimized.
+
+    Parameters
+    ----------
+    outfile_name : str
+        the output file name
+
+    coords : dic
+        the special dictionary that is generated by parse_files()
+    """
 
     header = "#file_id, line_number, column_numbers\n"
-    
+
     with open(outfile_name, "w") as outfile:
         outfile.write(header)
         for file_id, file_coords in coords.items():
@@ -88,6 +178,18 @@ def write_output_file(country_id, coords, outfile_name):
 
 
 def run(country_id, overwrite=False):
+    """
+    Run the script for one specific country.
+
+    Parameters
+    ----------
+    country_id : int
+        the id of the considered country
+
+    overwrite : bool
+        decide whether to overwrite an already existing mapping. if False the
+        specific country is skipped.
+    """
 
     outfile_name = "output/{0}_valid_indices.txt".format(country_id)
     if os.path.exists(outfile_name):
@@ -96,18 +198,21 @@ def run(country_id, overwrite=False):
             print("Overwriting...")
         else:
             print("Skipping...")
-            return 
+            return
 
     file_index = load_file_index()
     coords = parse_files(country_id, file_index[country_id])
-    write_output_file(country_id, coords, outfile_name)
+    write_output_file(coords, outfile_name)
     print("Country {0} done!".format(country_id))
-            
+
 
 def main():
+    """The main function. Iterates over all countries in the data set."""
 
     file_index = load_file_index()
-    for country_id in file_index.keys():
+
+    valid_countries = file_index.keys()
+    for country_id in valid_countries:
         print("Parsing files for country {0}...".format(country_id))
         run(country_id)
 

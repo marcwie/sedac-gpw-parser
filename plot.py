@@ -37,7 +37,7 @@ class Plot(Population):
         self._img_extent = img_extent
 
 
-    def plot(self):
+    def plot(self, title=""):
 
         img_extent =  self._img_extent
         data = self._population
@@ -67,7 +67,10 @@ class Plot(Population):
         delta_y = (y1 - y0) * 0.025
         ax.set_extent((x0 - delta_x, x1 + delta_x, y0 - delta_y, y1 + delta_y))
 
-        vmax = np.percentile(data[data > 0], 90)
+        if len(data[data>0]):
+            vmax = np.percentile(data[data > 0], 90)
+        else:
+            vmax = 0
 
         cs = ax.imshow(data, vmin=0, vmax=vmax, origin='upper',
                        extent=img_extent, cmap=cmap)
@@ -84,6 +87,7 @@ class Plot(Population):
         cbar = plt.colorbar(cs, cax=cax, extend="max", shrink=0.85)#, pad=0.025)
         cbar.set_label("Population per pixel", size=12)
 
+        ax.set_title(title)
         plt.savefig(self._output_path)
 
 

@@ -66,22 +66,24 @@ class Population(Grid):
         
         with open(input_file, "r") as infile:
             
-            counter = 0
-            while True:
+            n_col = int(infile.readline()[:-1].split(" ")[-1]) 
+            n_row = int(infile.readline()[:-1].split(" ")[-1]) 
+            self._llcrnrlon = float(infile.readline()[:-1].split(" ")[-1]) 
+            self._llcrnrlat = float(infile.readline()[:-1].split(" ")[-1]) 
+            self._cellsize = float(infile.readline()[:-1].split(" ")[-1]) 
+            
+            for _ in range(2):
+                infile.readline()
+
+            population = np.zeros((n_row, n_col))
+
+            for _ in range(n_row):
                 indices = infile.readline()
-                if indices == "":
-                    break
                 decompressed = self.decompress(indices) 
-                population.append(np.array(decompressed))
-                print(counter, end="\r")
-                counter += 1
+                population[_] = np.array(decompressed)
+                print(_, end="\r")
                 
-        pop_array = np.zeros((len(population), len(population[0])))
-        max_value = len(population)
-        for i in range(max_value):
-            pop_array[i] = population[i]
-       
-        self._population = pop_array
+        self._population = population
         print("Done..")
 
 
@@ -109,8 +111,17 @@ class Population(Grid):
         population = self._population
         
         max_value = len(population)
-
+        
+        n_row, n_col = population.shape
         outstring = ""
+        outstring += "ncols {0}\n".format(n_col)
+        outstring += "nrows {0}\n".format(n_row)
+        outstring += "llcrnrlon {0}\n".format(self._llcrnrlon)
+        outstring += "llcrnrlat {0}\n".format(self._llcrnrlat)
+        outstring += "cellsize {0}\n".format(self._cellsize)
+        outstring += "NOTINCOUNTRY_value -2\nNODATA_value -1\n"
+
+        print(outstring)
         for _, entry in enumerate(population):
             print(_, max_value, end="\r")
             outstring += self._compress(entry)+"\n"
@@ -137,9 +148,14 @@ class Population(Grid):
             
             with open(input_path.format(file_id)) as infile:
     
-                for _ in range(6):
+                for _ in range(4):
                     infile.readline()
-    
+                
+                cellsize = infile.readline()
+                cellsize = float(cellsize[:-1].split(" ")[-1])
+                
+                infile.readline()
+
                 all_y = list(file_coords.keys())
                 min_index = np.min(all_y)
                 max_index = np.max(all_y)
@@ -188,66 +204,12 @@ class Population(Grid):
             print("Rounding:", i, max_value, end="\r")
             population[i] = np.round(population[i], accuracy)
 
+        print(min_x, max_x, min_y, max_y)
         self._population = population
-
-
-#def plot_grid(coords):
-#    
-#    print("Loading population...")
-#    population = np.zeros((10800*2, 10800*4)) 
-#
-#    valid_x = set()
-#    valid_y = set()
-#   
-#    for file_id, file_coords in coords.items():
-#
-#        x_offset = 10800 * ((file_id-1) % 4)
-#        y_offset = 10800 * (file_id > 4)
-#        
-#        all_y = list(file_coords.keys())
-#        min_index = np.min(all_y)
-#        max_index = np.max(all_y)
-#            
-#        for i in range(max_index - min_index + 1):
-#            print(i, len(population), end="\r")
-#            y = min_index + i
-#            if y not in all_y:
-#                continue
-#
-#            x = file_coords[y]
-#            coords_x = [_x + x_offset for _x in x]
-#            coords_y = [ y + y_offset ] * len(x)
-#
-#            valid_x.update(coords_x)
-#            valid_y.update((y + y_offset,))
-#
-#            population[(coords_y, coords_x)] = 1
-#            #data[i] = np.array(line.split(" ")).astype(float)
-#   
-#    min_x = np.min(list(valid_x))
-#    max_x = np.max(list(valid_x))
-#    min_y = np.min(list(valid_y))
-#    max_y = np.max(list(valid_y))
-#    print(min_x, max_x, min_y, max_y) 
-#    population = population[min_y:(max_y+1), min_x:(max_x+1)]
-#
-#    print(population.shape)
-#
-#    return population
-
-
-#def plot(population, country_name, suffix=""):
-#    if not os.path.exists("plots"):
-#        os.mkdir("plots")
-#
-#    f = plt.figure()
-#    cmap = cm.get_cmap("Greens")
-#    cmap.set_under('0.5')
-#    
-#    plt.imshow(population, vmin=-1, vmax=np.nanpercentile(population, 95), cmap=cmap, origin='upper')
-#
-#    plt.savefig("plots/{0}{1}.png".format(country_name, suffix))
-#    plt.close()
+        self._llcrnrlon = (min_x * cellsize) % 360 - 180
+        self._llcrnrlat = (180 - max_y * cellsize) % 180 - 90
+        self._cellsize = cellsize 
+        
 
 if __name__ == "__main__":
-    pop = Population(country_id=276)
+    pop = Population(country_id=68)

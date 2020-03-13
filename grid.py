@@ -1,3 +1,38 @@
+"""
+Framework for working with the grid provided with the SEDAC GPW data set.
+
+For a given country this file provides helpers to find the coordinates of that
+country across the 8 different input files.
+
+Particularly, the provided class Grid contains a formalism to store the grid
+for each country in a space-efficient on the disk. For this a custom file
+format is used that contains all valid grid points of a country.
+
+An example of an output file could look like this:
+
+#file_id, line_number, column_numbers
+1 2206 77,101
+1 2207 72,106 108,112 114,119
+1 2208 56,59 71,102 107,135
+1 2209 52,60 76,81 84,94 95,102 106,122 124,139 140,149
+...
+4 5706 4873,4895
+4 5707 4873,4894
+4 5708 4874,4893
+4 5709 4875,4893
+4 5710 4876,4892
+
+The first line as a header. In each following line:
+- The first entry is the id of the corresponding input file
+- The second entry is the line number that contains relevant data
+  (starting from 0 after the file header)
+- All following entries are pairs of lower (inclusive) and upper bounds
+  (exclusive) for ranges of column numbers. For example `1,3 6,7, 8,10`
+  would correspond to column numbers `1,2,6,8,9`.
+
+The data can be parsed from the origial source files are read from disk if it
+was previously already processed using the Grid class.
+"""
 import os
 import numpy as np
 
@@ -6,7 +41,28 @@ COUNTRY_COORDS_FILENAME = "{0}_valid_indices.txt"
 FILE_INDEX_NAME = "file_index.txt"
 
 def _compress(array):
+    """
+    Compress a one-dimensional list with sequential entries.
 
+    If a range of consecutive numbers occurs within a list only the first and
+    last entry of that range or stored. Using the function _decompress() this
+    special format can be converted into the original list again.
+
+    See the examples below for what the script does.
+
+    :param array: The list that one wishes to compress.
+    :type array: 1d numpy array or list
+
+    :return: A representation of the compressed list or array.
+    :rtype: str
+
+    Examples:
+    >>> _compress([0,1,3,4,5,8])
+    '0,2 3,6 8,9'
+
+    >>> _compress([0,3,4,5,8,9,13,14,15])
+    '0,1 3,6 8,10 13,16'
+    """
     mask = np.diff(array) != 1
     upper_bounds = np.array(array[:-1])[mask]
     lower_bounds = np.array(array[1:])[mask]
@@ -28,7 +84,24 @@ def _compress(array):
 
 
 def _decompress(ranges):
+    """
+    Decompresses a list with sequential entries that is stored as a string
+    created from _compress().
 
+    See the help of _compress() for more information. Also see below for
+    examples on the format of the input.
+
+    :param ranges: Specially formatted strings containing the ranges in the
+                   desired list.
+    :type range: list of str
+
+    Examples:
+    >>> _decompress(['0,2', '3,6', '8,9'])
+    [0, 1, 3, 4, 5, 8]
+
+    >>> _decompress(['0,1', '3,6', '8,10', '13,16'])
+    [0, 3, 4, 5, 8, 9, 13, 14, 15]
+    """
     resolved_range = []
 
     for one_range in ranges:
@@ -40,16 +113,36 @@ def _decompress(ranges):
 
 
 def _skip_header(infile):
+    """
+    Skip the first 6 lines in a file.
+
+    Useful to skip the header in the sedac-gpw input files as they usually
+    contain the following entries (or similar):
+
+    ncols         10800
+    nrows         10800
+    xllcorner     -180
+    yllcorner     0
+    cellsize      0.0083333333333333
+    NODATA_value  -9999
+
+    :param infile: The file-object that was opened using f = open(...)
+    :type infle: io.TextIOWrapper
+    """
     # Itereate over the header and print the content
     for _ in range(6):
         print(infile.readline()[:-1])
 
 
 class Grid():
-
-    def __init__(self, country_id, output_folder="output/",
-                 input_folder="gpw-v4-national-identifier-grid-rev11_30_sec_asc/",
-                 overwrite=False):
+    """
+    Methods for reading the gpw population data grid and storing a condensed
+    version of a per-country grid to disk for later use.
+    """
+    def __init__(
+            self, country_id, output_folder="output/",
+            input_folder="gpw-v4-national-identifier-grid-rev11_30_sec_asc/",
+            overwrite=False):
         """Initialize an instance of Grid.
 
         :param country_id: The numerical ID of a country in the population

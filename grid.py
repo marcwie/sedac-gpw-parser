@@ -358,6 +358,10 @@ class Grid():
         The first entry in each row is the country id, the second
         (comma-separated) entry contains the indices of those input files that
         contain relevant data on the country.
+
+        For example if country 176 is present in file number 1,3 and 4 the line
+        in the output file reads:
+        176 1,3,4
         """
         file_index = self._file_index
         file_index_path = self._file_index_path

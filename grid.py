@@ -5,14 +5,71 @@ GRID_FILENAME = "gpw_v4_national_identifier_grid_rev11_30_sec_{0}.asc"
 COUNTRY_COORDS_FILENAME = "{0}_valid_indices.txt"
 FILE_INDEX_NAME = "file_index.txt"
 
+def _compress(array):
+
+    mask = np.diff(array) != 1
+    upper_bounds = np.array(array[:-1])[mask]
+    lower_bounds = np.array(array[1:])[mask]
+    lower_bounds = np.append(np.min(array), lower_bounds)
+    upper_bounds = np.append(upper_bounds, np.max(array)) + 1
+
+    lower_bounds = lower_bounds.astype(int)
+    upper_bounds = upper_bounds.astype(int)
+
+    assert len(lower_bounds) == len(upper_bounds)
+
+    outstring = ""
+    for lower_bound, upper_bound in zip(lower_bounds, upper_bounds):
+        outstring += str(lower_bound) + "," + str(upper_bound) + " "
+
+    outstring = outstring[:-1]
+
+    return outstring
+
+
+def _decompress(ranges):
+
+    resolved_range = []
+
+    for one_range in ranges:
+        lower_bound, upper_bound = one_range.split(",")
+        for _ in range(int(lower_bound), int(upper_bound)):
+            resolved_range.append(_)
+
+    return resolved_range
+
+
+def _skip_header(infile):
+    # Itereate over the header and print the content
+    for _ in range(6):
+        print(infile.readline()[:-1])
+
+
 class Grid():
-    
+
     def __init__(self, country_id, output_folder="output/",
                  input_folder="gpw-v4-national-identifier-grid-rev11_30_sec_asc/",
                  overwrite=False):
+        """Initialize an instance of Grid.
+
+        :param country_id: The numerical ID of a country in the population
+                           dataset. A list of valid IDs is found in the
+                           grid-data's lookup table.
+        :type country_id: int
+
+        :param output_folder: The relative path to the desired output folder.
+        :type output_folder: str
+
+        :param input_folder: The relative path to the input data containing the
+                             eight grid files.
+        :type input_folder: str
+
+        :param overwrite: If True, existing data will be written over.
+        :type overwrite: bool
+        """
 
         assert not overwrite, "Not implemented yet!"
-        
+
         country_coords_filename = COUNTRY_COORDS_FILENAME.format(country_id)
 
         self._grid_path = input_folder + GRID_FILENAME
@@ -37,67 +94,75 @@ class Grid():
 
 
     def parse_country_coords(self):
-       
+        """
+        Obtain all coordinates in the grid input files that represent the
+        considered country.
+        """
         country_id = self._country_id
         file_ids = self._file_ids
         grid_path = self._grid_path
 
         coords = {}
-        
+
         for file_id in file_ids:
-    
+
             with open(grid_path.format(file_id)) as infile:
-               
+
                 file_coords = {}
 
                 # Skip the header
-                self._skip_header(infile)
-    
+                _skip_header(infile)
+
                 # Iterate over each line containing data
-                for y in range(10800):
-                    
-                    print(y, end="\r")
+                for row_id in range(10800):
+
+                    print(row_id, end="\r")
                     line = infile.readline()
                     if " {0} ".format(country_id) in line:
                         line = line.split(" ")
                         assert line[0] != ""
                         assert line[-1] == "\n"
                         assert len(line) == 10801
-                        x = [_x for _x in range(10800) if line[_x] == str(country_id)]
-                        file_coords[y] = x
-    
+                        col_ids = [_x for _x in range(10800) if line[_x] == str(country_id)]
+                        file_coords[row_id] = col_ids
+
                 # Check that all lines have really been read
                 assert infile.readline() == ""
-    
+
                 coords[file_id] = file_coords
-    
+
         self._country_coords = coords
 
 
-    def _compress(self, array):
-    
-        mask = np.diff(array) != 1
-        upper_bounds = np.array(array[:-1])[mask]
-        lower_bounds = np.array(array[1:])[mask]
-        lower_bounds = np.append(np.min(array), lower_bounds)
-        upper_bounds = np.append(upper_bounds, np.max(array)) + 1
-        
-        lower_bounds = lower_bounds.astype(int)
-        upper_bounds = upper_bounds.astype(int)
-    
-        assert len(lower_bounds) == len(upper_bounds)
-    
-        outstring = ""
-        for lower_bound, upper_bound in zip(lower_bounds, upper_bounds):
-            outstring += str(lower_bound) + "," + str(upper_bound) + " "
-    
-        outstring = outstring[:-1]
-    
-        return outstring
-    
-    
     def save_country_coords(self):
-   
+        """
+        Dump the coordinates to a file for later use.
+
+        Uses a custom file format to save space on the disk and to allow for
+        fast processing.
+
+        An example of an output file could look like this:
+
+        #file_id, line_number, column_numbers
+        1 2206 77,101
+        1 2207 72,106 108,112 114,119
+        1 2208 56,59 71,102 107,135
+        1 2209 52,60 76,81 84,94 95,102 106,122 124,139 140,149
+        ...
+        4 5706 4873,4895
+        4 5707 4873,4894
+        4 5708 4874,4893
+        4 5709 4875,4893
+        4 5710 4876,4892
+
+        The first line as a header. In each following line:
+        - The first entry is the id of the corresponding input file
+        - The second entry is the line number that contains relevant data
+          (starting from 0 after the file header)
+        - All following entries are pairs of lower (inclusive) and upper bounds
+          (exclusive) for ranges of column numbers. For example `1,3 6,7, 8,10`
+          would correspond to column numbers `1,2,6,8,9`.
+        """
         outfile_name = self._country_coords_path
         coords = self._country_coords
 
@@ -107,25 +172,20 @@ class Grid():
             outfile.write(header)
             for file_id, file_coords in coords.items():
                 for line_id, col_ids in file_coords.items():
-                    col_ranges = self._compress(col_ids)
+                    col_ranges = _compress(col_ids)
                     line = "{0} {1} {2}\n".format(file_id, line_id, col_ranges)
                     outfile.write(line)
 
 
-    def _decompress(self, ranges):
-
-        resolved_range = []
-
-        for one_range in ranges:
-            lower_bound, upper_bound = one_range.split(",")
-            for _ in range(int(lower_bound), int(upper_bound)):
-                resolved_range.append(_)
-
-        return resolved_range
-
-
     def load_country_coords(self):
-       
+        """
+        Load previously dumpled coordinates for the country from the disk.
+
+        Requires files formatted as shown in the documentation of
+        Grid.save_country_coords(). Usually this function can only be called
+        after Grid.save_country_coords() has been called once for the country
+        under consideration.
+        """
         file_ids = self._file_ids
         file_name = self._country_coords_path
 
@@ -138,20 +198,22 @@ class Grid():
                 line = line[:-1].split(" ")
                 file_id = int(line[0])
                 row_id = int(line[1])
-                col_ids = self._decompress(line[2:])
-                
+                col_ids = _decompress(line[2:])
+
                 coords[file_id][row_id] = col_ids
-        
+
         self._country_coords = coords
-       
-    
-    def _skip_header(self, infile):
-        # Itereate over the header and print the content
-        for _ in range(6):
-            print(infile.readline()[:-1])
 
 
     def generate_file_index(self):
+        """
+        Generate an index that contains for each country in the population data
+        set a mapping between the country ids and the input files that contain
+        the country.
+
+        This file is dumped to disk and used later to only load those files for
+        a given country that contain relevant data.
+        """
         print("Generating file index...")
 
         grid_path = self._grid_path
@@ -163,7 +225,7 @@ class Grid():
 
             with open(grid_path.format(i)) as infile:
 
-                self._skip_header(infile)
+                _skip_header(infile)
 
                 # Iterate over each line containing data
                 for j in range(10800):
@@ -188,7 +250,22 @@ class Grid():
 
 
     def save_file_index(self):
-        
+        """
+        Dump the file index generated with Grid.generate_file_index() to disk.
+
+        The file will have the following structure:
+
+        #COUNTRY_ID FILE_IDS
+        222 1,2
+        643 1,3,4
+        320 1,2
+        484 1,2
+        296 1,4,5,8
+
+        The first entry in each row is the country id, the second
+        (comma-separated) entry contains the indices of those input files that
+        contain relevant data on the country.
+        """
         file_index = self._file_index
         file_index_path = self._file_index_path
 
@@ -201,7 +278,13 @@ class Grid():
 
 
     def load_file_index(self):
-        
+        """
+        Load a previously dumped file index.
+
+        This function is usually oncly called after the file index was
+        generated with Grid.generate_file_index() and dumped to disk using
+        Grid.save_file_index().
+        """
         file_index_path = self._file_index_path
         country_id = self._country_id
 
@@ -213,6 +296,6 @@ class Grid():
                 file_list = file_list[:-1].split(",")
                 file_list = [int(_f) for _f in file_list]
                 file_index[int(country)] = file_list
-    
+
         self._file_index = file_index
         self._file_ids = file_index[country_id]

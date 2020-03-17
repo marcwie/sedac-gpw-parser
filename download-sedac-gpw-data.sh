@@ -1,12 +1,16 @@
 #!/bin/bash
 
+BASE_URL=https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/
+
 POPULATION_FILE=gpw-v4-population-count-rev11_2020_30_sec_asc.zip 
 POPULATION_MD5_REF=7a5dd42681fa679d147e6bd126d322db
 POPULATION_FOLDER=gpw-v4-population-count-rev11_2020_30_sec_asc
+POPULATION_URL=${BASE_URL}gpw-v4-population-count-rev11/gpw-v4-population-count-rev11_2020_30_sec_asc.zip
 
 GRID_FILE=gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip
 GRID_MD5_REF=41c68dc4b5c9dccacba3fe38c9b5a3cf
 GRID_FOLDER=gpw-v4-national-identifier-grid-rev11_30_sec_asc
+GRID_URL=${BASE_URL}gpw-v4-national-identifier-grid-rev11/gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip
 
 # trap ctrl-c and call ctrl_c()
 trap ctrl_c INT
@@ -52,24 +56,16 @@ function get_data() {
     
     if [ $DOWNLOAD_GRID == 1 ]
     then
-        wget --continue \
-            --load-cookies ~/.urs_cookies \
-            --save-cookies ~/.urs_cookies \
-            --keep-session-cookies \
-            --auth-no-challenge \
-            -O gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip \
-            https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-national-identifier-grid-rev11/gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip
+        wget --continue --load-cookies ~/.urs_cookies \
+            --save-cookies ~/.urs_cookies --keep-session-cookies \
+            --auth-no-challenge -O $GRID_FILE $GRID_URL
     fi
     
     if [ $DOWNLOAD_POP == 1 ]
     then
-        wget --continue \
-            --load-cookies ~/.urs_cookies \
-            --save-cookies ~/.urs_cookies \
-            --keep-session-cookies \
-            --auth-no-challenge \
-            -O gpw-v4-population-count-rev11_2020_30_sec_asc.zip \
-            https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-count-rev11/gpw-v4-population-count-rev11_2020_30_sec_asc.zip
+        wget --continue --load-cookies ~/.urs_cookies \
+            --save-cookies ~/.urs_cookies --keep-session-cookies \
+            --auth-no-challenge -O $POPULATION_FILE $POPULATION_URL
     fi
 
     clean

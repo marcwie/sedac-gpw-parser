@@ -11,12 +11,9 @@ A collection of scipts to work with high resolution gridded population data from
 
 # Usage
 
-1. Create an account at https://urs.earthdata.nasa.gov/ and keep logged in (otherwise you won't be able to download data).
+1. Create an account at https://urs.earthdata.nasa.gov/ 
 
-1. Download the following file containing information on the grid:
-https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-national-identifier-grid-rev11/gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip
-
-2. Extract the data into the working directory ("./")
+2. Use `download-sedac-gpw-data.sh` to download the necessary data. The script will prompt for your EarthData username and password. Note that the script temporarily writes your password in plain text to `~/.netrc` in your home folder. However, the file is removed right after the scripts succesfully exits or in case of a keyboard interrupt. 
 
 2. Use `create_file_index.py` to check which countries are present in each of the eight files
 

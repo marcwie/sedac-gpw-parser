@@ -20,4 +20,5 @@ setuptools.setup(
     #],
     scripts=("bash_scripts/download-sedac-gpw-data.sh", ),
     python_requires='>=3',
+    install_requires=['numpy', 'matplotlib', 'cartopy'],
 )

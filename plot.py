@@ -68,7 +68,7 @@ class Plot(Population):
         axs.set_extent(
             (ll_x - delta_x, ur_x + delta_x, ll_y - delta_y, ur_y + delta_y))
 
-        if len(data[data > 0]) == 0:
+        if len(data[data > 0]) > 0:
             vmax = np.percentile(data[data > 0], 90)
         else:
             vmax = 0

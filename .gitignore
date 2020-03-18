@@ -5,3 +5,4 @@ plots/
 __pycache__/
 gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip 
 gpw-v4-population-count-rev11_2020_30_sec_asc.zip
+sedac_gpw_parser.egg-info/

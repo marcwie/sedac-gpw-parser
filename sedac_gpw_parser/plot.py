@@ -11,7 +11,7 @@ from matplotlib import cm
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import numpy as np
-from population import Population
+from .population import Population
 
 class Plot(Population):
 

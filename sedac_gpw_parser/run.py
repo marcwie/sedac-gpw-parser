@@ -13,7 +13,7 @@ for each valid country:
     pipeline.
 """
 import os
-from plot import Plot
+from .plot import Plot
 
 COUNTRY_CODES = "gpw-v4-national-identifier-grid-rev11_30_sec_asc/"\
         "gpw_v4_national_identifier_grid_rev11_lookup.txt"

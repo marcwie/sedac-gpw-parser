@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from grid import Grid
+from .grid import Grid
 
 POPULATION_FILE_NAME = "gpw_v4_population_count_rev11_2020_30_sec_{0}.asc"
 POP_OUTPUT_FILE_NAME = "{0}_population.txt"

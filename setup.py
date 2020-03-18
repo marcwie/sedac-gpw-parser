@@ -20,5 +20,10 @@ setuptools.setup(
     #],
     scripts=("bash_scripts/download-sedac-gpw-data.sh", ),
     python_requires='>=3',
-    install_requires=['numpy', 'matplotlib', 'cartopy'],
-)
+    setup_requires=['numpy', 'cython'], # This is needed for proper install of cartopy
+    install_requires=['numpy', 
+                      'matplotlib', 
+                      'cartopy', 
+                      'scipy',      # Scipy is required for cartopy to work
+                      'shapely<=1.6.4.post2']  
+    )

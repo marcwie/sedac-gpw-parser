@@ -36,8 +36,8 @@ python setup.py install
     - `COUNTRYID.png` shows the data on a map
 
 # Design principle & objectives
-- Be as light as possible on RAM (storing the entire dataset into RAM causes
-    unexpected behaviour on high performance clusters (that usually have very low memory) and older hardware. 
+- Be as light as possible on RAM since storing the entire dataset into RAM is expected to cause
+    trouble on high performance clusters (that usually have very low memory) and older hardware
 - Develop a file format that reduces the amount of stored redundancy and
     consequently output file sizes while style being `python`-readible without using external compression algorithms
 - Allow for output files to be versioned with git (or similar) or inspected by using common text editors. Thus the choice

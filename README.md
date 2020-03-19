@@ -37,11 +37,10 @@ python setup.py install
 
 # Design principle & objectives
 - Be as light as possible on RAM (storing the entire dataset into RAM causes
-    unexpected behaviour on low memory high performance clusters as well as my
-    crappy old computer...)
+    unexpected behaviour on high performance clusters (that usually have very low memory) and older hardware. 
 - Develop a file format that reduces the amount of stored redundancy and
-    consequently output file sizes
-- Allow for output files to be versioned with git (or similar). Thus the choice
+    consequently output file sizes while style being `python`-readible without using external compression algorithms
+- Allow for output files to be versioned with git (or similar) or inspected by using common text editors. Thus the choice
     of using plain text output files
 
 # Custom file format for output files

@@ -1,4 +1,4 @@
-A package for working work with high resolution gridded population data from the Socioeconomic Data and Applications Center (sedac). The package already works well but is still work in progress and updated frequently.
+A package for working with high resolution gridded population data from the Socioeconomic Data and Applications Center (sedac). The package already works well but is still work in progress and updated frequently.
 
 Information on the input date, i.e., the gridded global population count, is found here: https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-count-rev11
 

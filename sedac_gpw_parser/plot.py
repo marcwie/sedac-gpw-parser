@@ -109,6 +109,7 @@ class Plot(Population):
 
         axs.set_title(title)
         plt.savefig(self._output_path)
+        plt.close()
 
 
 def main():

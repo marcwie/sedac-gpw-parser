@@ -13,6 +13,18 @@ import cartopy.feature as cfeature
 import numpy as np
 from .population import Population
 
+def _add_colorbar_axs(fig, plot_axs):
+
+    axpos = plot_axs.get_position()
+    pos_x = axpos.x0 + axpos.width + 0.025
+    pos_y = axpos.y0 + axpos.height * 0.1
+    cax_width = 0.025
+    cax_height = axpos.height * 0.8
+    cax = fig.add_axes([pos_x, pos_y, cax_width, cax_height])
+    
+    return cax
+ 
+
 class Plot(Population):
 
     def __init__(self, country_id, plot_folder="./plots/"):
@@ -29,6 +41,8 @@ class Plot(Population):
 
         self._compute_image_extent()
 
+        self.set_colormap()
+
     def _compute_image_extent(self):
 
         data = self._population
@@ -41,12 +55,29 @@ class Plot(Population):
         self._img_extent = extent
 
 
+    def _add_padding(self, axs, padding=0.025):
+        
+        ll_x, ur_x, ll_y, ur_y = self._img_extent
+        delta_x = (ur_x - ll_x) * padding
+        delta_y = (ur_y - ll_y) * padding
+
+        axs.set_extent(
+            (ll_x - delta_x, ur_x + delta_x, ll_y - delta_y, ur_y + delta_y))
+
+
+    def set_colormap(self, colormap="Purples"):
+
+        cmap = cm.get_cmap(colormap)
+        cmap.set_under('0.8')
+        
+        self._cmap = cmap
+
+
     def plot(self, title=""):
 
-        img_extent = self._img_extent
         data = self._population
 
-        ll_x, ur_x, ll_y, ur_y = img_extent
+        ll_x, ur_x, ll_y, ur_y = self._img_extent
 
         # Set up the plot
         fig = plt.figure(figsize=(8*(ur_x - ll_x)/(ur_y - ll_y), 8))
@@ -59,31 +90,27 @@ class Plot(Population):
             facecolor="None")
         axs.add_feature(border, zorder=2, linewidth=0.5)
         axs.coastlines(resolution="50m", linewidth=1.5, zorder=3)
-
-        cmap = cm.get_cmap("Purples")
-        cmap.set_under('0.8')
-
-        delta_x = (ur_x - ll_x) * 0.025
-        delta_y = (ur_y - ll_y) * 0.025
-        axs.set_extent(
-            (ll_x - delta_x, ur_x + delta_x, ll_y - delta_y, ur_y + delta_y))
-
+        self._add_padding(axs=axs)
+    
         if len(data[data > 0]) > 0:
             vmax = np.percentile(data[data > 0], 90)
         else:
             vmax = 0
 
-        data_crs = ccrs.PlateCarree()
+        #data_crs = ccrs.PlateCarree()
         colorscheme = axs.imshow(
-            data, vmin=0, vmax=vmax, origin='upper', extent=img_extent,
-            cmap=cmap, transform=data_crs)
+            data, vmin=0, vmax=vmax, origin='upper', extent=self._img_extent,
+            cmap=self._cmap, transform=ccrs.PlateCarree()
+                                 )
+        #data_crs)
 
-        axpos = axs.get_position()
-        pos_x = axpos.x0 + axpos.width + 0.025
-        pos_y = axpos.y0 + axpos.height * 0.1
-        cax_width = 0.025
-        cax_height = axpos.height * 0.8
-        cax = fig.add_axes([pos_x, pos_y, cax_width, cax_height])
+        cax = _add_colorbar_axs(fig=fig, plot_axs=axs)
+        #axpos = axs.get_position()
+        #pos_x = axpos.x0 + axpos.width + 0.025
+        #pos_y = axpos.y0 + axpos.height * 0.1
+        #cax_width = 0.025
+        #cax_height = axpos.height * 0.8
+        #cax = fig.add_axes([pos_x, pos_y, cax_width, cax_height])
 
         cbar = plt.colorbar(colorscheme, cax=cax, extend="max", shrink=0.85)
         cbar.set_label("Population per pixel", size=12)
@@ -93,8 +120,12 @@ class Plot(Population):
 
 
 def main():
+    """
+    Plot as an example the data for Germany (country id 276).
+    """
     plot = Plot(country_id=276)
     plot.plot()
+
 
 if __name__ == "__main__":
     main()

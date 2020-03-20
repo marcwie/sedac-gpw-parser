@@ -4,7 +4,6 @@ Plot statistics of a country's spatial population distribution.
 Relies on parsing input data that has been preprocessed by the classes Grid and
 Population.
 """
-
 import os
 from matplotlib import pyplot as plt
 from matplotlib import cm
@@ -12,6 +11,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import numpy as np
 from .population import Population
+
 
 def _add_colorbar_axs(fig, plot_axs):
 
@@ -21,13 +21,16 @@ def _add_colorbar_axs(fig, plot_axs):
     cax_width = 0.025
     cax_height = axpos.height * 0.8
     cax = fig.add_axes([pos_x, pos_y, cax_width, cax_height])
-    
+
     return cax
- 
+
 
 class Plot(Population):
 
     def __init__(self, country_id, plot_folder="./plots/"):
+
+        if plot_folder[-1] != "/":
+            plot_folder += "/"
 
         if not os.path.exists(plot_folder):
             os.mkdir(plot_folder)
@@ -40,7 +43,6 @@ class Plot(Population):
         self._output_path = plot_folder + str(country_id) + ".png"
 
         self._compute_image_extent()
-
         self.set_colormap()
 
     def _compute_image_extent(self):
@@ -56,7 +58,7 @@ class Plot(Population):
 
 
     def _add_padding(self, axs, padding=0.025):
-        
+
         ll_x, ur_x, ll_y, ur_y = self._img_extent
         delta_x = (ur_x - ll_x) * padding
         delta_y = (ur_y - ll_y) * padding
@@ -69,7 +71,7 @@ class Plot(Population):
 
         cmap = cm.get_cmap(colormap)
         cmap.set_under('0.8')
-        
+
         self._cmap = cmap
 
 
@@ -91,27 +93,17 @@ class Plot(Population):
         axs.add_feature(border, zorder=2, linewidth=0.5)
         axs.coastlines(resolution="50m", linewidth=1.5, zorder=3)
         self._add_padding(axs=axs)
-    
+
         if len(data[data > 0]) > 0:
             vmax = np.percentile(data[data > 0], 90)
         else:
             vmax = 0
 
-        #data_crs = ccrs.PlateCarree()
-        colorscheme = axs.imshow(
-            data, vmin=0, vmax=vmax, origin='upper', extent=self._img_extent,
-            cmap=self._cmap, transform=ccrs.PlateCarree()
-                                 )
-        #data_crs)
+        colorscheme = axs.imshow(data, vmin=0, vmax=vmax, origin='upper',
+                                 extent=self._img_extent, cmap=self._cmap,
+                                 transform=ccrs.PlateCarree())
 
         cax = _add_colorbar_axs(fig=fig, plot_axs=axs)
-        #axpos = axs.get_position()
-        #pos_x = axpos.x0 + axpos.width + 0.025
-        #pos_y = axpos.y0 + axpos.height * 0.1
-        #cax_width = 0.025
-        #cax_height = axpos.height * 0.8
-        #cax = fig.add_axes([pos_x, pos_y, cax_width, cax_height])
-
         cbar = plt.colorbar(colorscheme, cax=cax, extend="max", shrink=0.85)
         cbar.set_label("Population per pixel", size=12)
 

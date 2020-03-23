@@ -68,13 +68,15 @@ class Population(Grid):
         print("Total population:", self.total_population())
 
 
+    def population_array(self):
+        
+        return self._population.copy()
+
     def total_population(self):
         population = self._population
         total_population = population[population > 0].sum()
 
         return total_population
-
-
 
 
     def load_compressed_population(self):
@@ -102,10 +104,25 @@ class Population(Grid):
                 population[_] = np.array(decompressed)
                 print(_, end="\r")
 
+        self._nlat = n_row
+        self._nlon = n_col
         self._population = population
+
         print("Done..")
 
 
+    def latitude_range(self):
+         
+        lats = np.arange(self._llcrnrlat, self._llcrnrlat + self._nlat * self._cellsize, self._cellsize)
+        
+        return lats
+
+
+    def longitude_range(self):
+         
+        lons = np.arange(self._llcrnrlon, self._llcrnrlon + self._nlon * self._cellsize, self._cellsize)
+        
+        return lons
 
 
     def save_compressed_population(self):

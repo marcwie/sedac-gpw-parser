@@ -12,6 +12,8 @@ A few system-wide packages are required for this package to work (this is due to
 
 For other operating systems and linux flavours please do `pip install cartopy` before installing `sedac-gpw-parser` and make sure that `cartopy` is installed correctly.
 
+To properly download and prepare the data you need to have `unzip` installed. This can be done in Ubuntu by typing `sudo apt-get install unzip`.
+
 # Installation
 
 This package only works with `python3`. To install just type:

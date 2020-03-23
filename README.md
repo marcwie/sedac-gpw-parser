@@ -44,11 +44,43 @@ python setup.py install
 3. If you want to work with the population data by, e.g., doing further analysis and evaluation, you can get a 2d `numpy` array of the data and the ranges of covered latitudes and longitudes by using the following snippet:
     ```python
     from sedac_gpw_parser import population
-    pop = population.Population(country_id=276)
+    pop = population.Population(country_id=250)
     population_array = pop.population_array()
     latitudes = pop.latitude_range()
     longitudes = pop.longitude_range()
     ```
+    
+4. Note that `country_id=250` in the above example returns the data for *France*. If you want to know the `id` of a certain country you can use 
+    ```python
+    from sedac_gpw_parser import utils
+    utils.id_lookup("france")
+    ```
+    which generates the output:
+    ```
+    France : 250
+    ```
+    You can also do more fuzzy searches:
+    ```python
+    from sedac_gpw_parser import utils
+    utils.id_lookup("unit")    
+    ```
+    which gives you:
+    ```
+    United Arab Emirates : 784
+    United Kingdom of Great Britain and Northern Ireland : 826
+    United Republic of Tanzania : 834
+    United States of America : 840
+    United States Virgin Islands : 850
+    United States Minor Outlying Islands : 908
+    ```
+    
+4. If you want to plot the data for a specific country you can use the following snippet:
+    ```python
+    from sedac_gpw_parser import utils
+    plt = plot.Plot(country_id=250)
+    plt.plot()
+    ```
+    You can use `plt.plot(show=True)` instead of `plt.plot()` if you want to display the figure in a `jupyter notebook`.
 
 # Design principle & objectives
 - Be as light as possible on RAM since storing the entire dataset into RAM is expected to cause

@@ -65,7 +65,7 @@ class Population(Grid):
         print("Loading population...")
         self.load_compressed_population()
 
-        print("Total population:", self.total_population())
+        #print("Total population:", self.total_population())
 
 
     def population_array(self):

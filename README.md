@@ -42,13 +42,13 @@ python setup.py install
     - `COUNTRYID.png` shows the data on a map
 
 3. If you want to work with the population data by, e.g., doing further analysis and evaluation, you can get a 2d `numpy` array of the data and the ranges of covered latitudes and longitudes by using the following snippet:
-```python
-from sedac_gpw_parser import population
-pop = population.Population(country_id=276)
-population_array = pop.population_array()
-latitudes = pop.latitude_range()
-longitudes = pop.longitude_range()
-```
+    ```python
+    from sedac_gpw_parser import population
+    pop = population.Population(country_id=276)
+    population_array = pop.population_array()
+    latitudes = pop.latitude_range()
+    longitudes = pop.longitude_range()
+    ```
 
 # Design principle & objectives
 - Be as light as possible on RAM since storing the entire dataset into RAM is expected to cause

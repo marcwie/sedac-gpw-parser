@@ -6,6 +6,10 @@ Information on the corresponding grid that provides information on which country
 
 Note that for now the package only parses the most recent 2020 estimates even though estimates for the years 2000, 2005, 201 and 2015 are available as well.
 
+# Requirements
+
+A few packages are required for this package to work (this is due to the depence on `cartopy` that allows to plot the data on a map). For Ubuntu you should type `sudo apt-get install libgeos-dev libproj-dev`.
+
 # Installation
 
 This package only works with `python3`. To install just type:

@@ -75,7 +75,7 @@ class Plot(Population):
         self._cmap = cmap
 
 
-    def plot(self, title=""):
+    def plot(self, title="", show=False):
 
         data = self._population
 
@@ -108,6 +108,10 @@ class Plot(Population):
         cbar.set_label("Population per pixel", size=12)
 
         axs.set_title(title)
+
+        if show:
+            plt.show()
+
         plt.savefig(self._output_path)
         plt.close()
 

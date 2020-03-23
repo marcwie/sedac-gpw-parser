@@ -8,7 +8,7 @@ Note that for now the package only parses the most recent 2020 estimates even th
 
 # Requirements
 
-A few packages are required for this package to work (this is due to the depence on `cartopy` that allows to plot the data on a map). For Ubuntu you should type `sudo apt-get install libgeos-dev libproj-dev`.
+A few system-wide packages are required for this package to work (this is due to the depence on `cartopy` that allows to plot the data on a map). For Ubuntu you should type `sudo apt-get install libgeos-dev libproj-dev`.
 
 # Installation
 

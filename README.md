@@ -137,7 +137,7 @@ python setup.py install
         4 5709 4875,4893
         4 5710 4876,4892
 
-    The first line as a header. In each following line:
+    The first line is a header. In each following line:
     
     - The first entry is the id of the corresponding input file (between 1 and 8)
     - The second entry is the line number that contains relevant data (starting from 0 after the file header)

@@ -35,7 +35,7 @@ python setup.py install
     python -m "sedac_gpw_parser.run"
     ```
 
-    `download-sedac-gpw-data.sh` downloads the necessary data. The script prompts for your EarthData login credentials. Note that the script temporarily writes your password in plain text to `~/.netrc` in your home folder. However, the file is removed right after the scripts succesfully exits or in case of a keyboard interrupt. 
+    `download-sedac-gpw-data.sh` downloads the necessary data. The script prompts for your EarthData login credentials. Note that the script temporarily writes your password in plain text to `~/.netrc` in your home folder. However, the file is removed right after the scripts succesfully exits or in case of a keyboard interrupt. In some cases the script has proven to be error prone. See [below](#known-issues) for how to retrieve the input files manually.
 
     `python -m "sedac_gpw_parser.run"` prepares the data for later use for each of the 245 countries that are present in the data-set. For each country it creates three files:
     
@@ -84,6 +84,35 @@ python setup.py install
     ```
     You can use `plt.plot(show=True)` instead of `plt.plot()` if you want to display the figure in a `jupyter notebook`.
 
+# Known issues
+
+1. For some reason the script `download-sedac-gpw-data.sh` has proven to be error prone on some systems. Instead of using the script you can prepare your working directory like so:
+    ```
+    mkdir workdir
+    ```
+    Then open your browser and log in to https://urs.earthdata.nasa.gov/. Don't close your browser and keep logged in.
+    Next follow the two links below to download the necessary input files:
+    
+    - https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-count-rev11/gpw-v4-population-count-rev11_2020_30_sec_asc.zip
+    - https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-national-identifier-grid-rev11/gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip
+    
+    Make sure to download both files into your `workdir`. After succesfully retrieving the files unzip them and confirm that the extracted file structure looks like so:
+    ```
+    workdir/
+    ├── gpw-v4-national-identifier-grid-rev11_30_sec_asc
+    │   ├── gpw_v4_national_identifier_grid_rev11_30_sec_1.asc
+    │   ├── gpw_v4_national_identifier_grid_rev11_30_sec_1.prj
+    │   ├── ...
+    │   └── gpw_v4_national_identifier_grid_rev11_lookup.txt
+    ├── gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip
+    ├── gpw-v4-population-count-rev11_2020_30_sec_asc
+    │   ├── gpw_v4_population_count_rev11_2020_30_sec_1.asc
+    │   ├── gpw_v4_population_count_rev11_2020_30_sec_1.prj
+    │   ├── ...
+    └── gpw-v4-population-count-rev11_2020_30_sec_asc.zip
+    ```
+    Most tools for unarchiving create such a directory structure automatically by extracting files into a folder with the same name as the `.zip`-archive.
+    
 # Design principle & objectives
 - Be as light as possible on RAM since storing the entire dataset into RAM is expected to cause
     trouble on high performance clusters (that usually have very low memory) and older hardware

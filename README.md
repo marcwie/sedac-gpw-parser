@@ -35,7 +35,9 @@ python setup.py install
     python -m "sedac_gpw_parser.run"
     ```
 
-    `download-sedac-gpw-data.sh` downloads the necessary data. The script prompts for your EarthData login credentials. Note that the script temporarily writes your password in plain text to `~/.netrc` in your home folder. However, the file is removed right after the scripts succesfully exits or in case of a keyboard interrupt. In some cases the script has proven to be error prone. See [below](#known-issues) for how to retrieve the input files manually.
+    `download-sedac-gpw-data.sh` downloads the necessary data. The script prompts for your EarthData login credentials. Note that the script temporarily writes your password in plain text to `~/.netrc` in your home folder. However, the file is removed right after the scripts succesfully exits or in case of a keyboard interrupt. 
+    
+    **Note**: In some cases `download-sedac-gpw-data.sh` has proven to be error prone. See [below](#known-issues) for how to retrieve the input files manually.
 
     `python -m "sedac_gpw_parser.run"` prepares the data for later use for each of the 245 countries that are present in the data-set. For each country it creates three files:
     

@@ -98,7 +98,11 @@ python setup.py install
     - https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-count-rev11/gpw-v4-population-count-rev11_2020_30_sec_asc.zip
     - https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-national-identifier-grid-rev11/gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip
     
-    Make sure to download both files into your `workdir`. After succesfully retrieving the files unzip them and confirm that the extracted file structure looks like so:
+    Make sure to download both files into your `workdir`. 
+    
+    You should then be able to `cd` into your `workdir` and run `download-sedac-gpw-data.sh` to extract the files into the required structure. 
+    
+    You can also extract both `.zip`-files manually and confirm that the extracted file structure looks like so:
     ```
     workdir/
     ├── gpw-v4-national-identifier-grid-rev11_30_sec_asc

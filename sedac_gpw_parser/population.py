@@ -113,15 +113,15 @@ class Population(Grid):
 
     def latitude_range(self):
          
-        lats = np.arange(self._llcrnrlat, self._llcrnrlat + self._nlat * self._cellsize, self._cellsize)
-        
+        lats = self._llcrnrlat + np.arange(self._nlat) * self._cellsize
+
         return lats
 
 
     def longitude_range(self):
          
-        lons = np.arange(self._llcrnrlon, self._llcrnrlon + self._nlon * self._cellsize, self._cellsize)
-        
+        lons = self._llcrnrlon + np.arange(self._nlon) * self._cellsize
+
         return lons
 
 

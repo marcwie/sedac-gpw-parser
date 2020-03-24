@@ -91,7 +91,7 @@ python setup.py install
     mkdir workdir
     ```
     Then open your browser and log in to https://urs.earthdata.nasa.gov/. Don't close your browser and keep logged in.
-    Next follow the two links below to download the necessary input files:
+    Follow the two links below to download the necessary input files:
     
     - https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-count-rev11/gpw-v4-population-count-rev11_2020_30_sec_asc.zip
     - https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-national-identifier-grid-rev11/gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip

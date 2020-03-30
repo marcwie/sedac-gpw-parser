@@ -150,3 +150,43 @@ python setup.py install
     - All following entries are pairs of lower (inclusive) and upper bounds (exclusive) for ranges of column numbers. For example `1,3 6,7, 8,10` would correspond to column numbers `1,2,6,8,9`.
     
     Hence for the example above, the line `4 5706 4873,4895` means that the file `gpw_v4_population_count_rev11_2020_30_sec_4.asc` contains relevant population data for the country with id `COUNTRYID` in row 5706 and columns 4873 to 4894 (4895-1). 
+    
+2. `COUNTRY_ID_population.txt` has the following custom format:
+        
+        ncols 880
+        nrows 1780
+        llcrnrlon 102.14166666666557
+        llcrnrlat 8.56666666666699
+        cellsize 0.0083333333333333
+        NOTINCOUNTRY_value -2
+        NODATA_value -1
+        381x-2.0 1x125.026 498x-2.0
+        377x-2.0 1x114.891 1x122.275 1x130.712 1x130.297 1x135.221 1x133.586 497x-2.0
+        ...
+        322x-2.0 1x20.37 1x39.449 1x40.073 1x5.32 554x-2.0
+
+    The first 7 lines are the header. They describe:
+    - The longitudinal extent of the data, i.e., the number of grid-cells or pixel
+      in longitudinal direction.
+    - The latitudinal extent of the data, i.e., the number of grid-cells or pixel
+      in latitudinal direction.
+    - The longitudinal position of the lower left corner of the image and, hence,
+      also the lower left corner of of the lower left pixel.
+    - The latitudinal position of the lower left corner of the image and, hence,
+      also the lower left corner of of the lower left pixel.
+    - The pixel- or cellsize in both, latitudinal and longitudinal, directions
+      (measured in radiants). For the 30 arc-second resolution this value should
+      correspond to 1/120.
+    - The value indicating if a pixel or grid-cell is outside the considered
+      country (usually -2).
+    - The value indicating if a pixel or grid-cell has no data but is located
+      inside the considered country (usually -1).
+
+    The following *nrows* lines hold the data in a compressed format. The line
+    ```
+    381x-2.0 1x125.026 498x-2.0
+    ```
+    implies that the corresponding row of a decompressed array holds 381 times a
+    `-2`, 1 time a `125.026` and then again 498 times a `-2`. The number of multipliers
+    must equal the number of columns (`ncols` in the header). In this example we have
+    `381+1+498=880=ncols`.

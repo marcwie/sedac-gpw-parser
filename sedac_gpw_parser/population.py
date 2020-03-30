@@ -1,12 +1,82 @@
+"""
+Parse population data from the ASCII input files that are provided by the
+Socioeconomic Data and Applications Center (sedac) and that have been
+downloaded using download-sedac-gpw-data.sh.
+
+Loads the ascii input files, crops the data to match a specified country and
+stores the data in a custom space-saving file format for later use. Provides
+functions to compress and decompress, i.e., load and save data to and from the
+custom file format.
+
+The data itself describes the population count per pixel.
+
+An example data set in the custom file format reads like so:
+
+ncols 880
+nrows 1780
+llcrnrlon 102.14166666666557
+llcrnrlat 8.56666666666699
+cellsize 0.0083333333333333
+NOTINCOUNTRY_value -2
+NODATA_value -1
+381x-2.0 1x125.026 498x-2.0
+377x-2.0 1x114.891 1x122.275 1x130.712 1x130.297 1x135.221 1x133.586 497x-2.0
+...
+322x-2.0 1x20.37 1x39.449 1x40.073 1x5.32 554x-2.0
+
+The first 7 lines are the header. They describe:
+- The longitudinal extent of the data, i.e., the number of grid-cells or pixel
+  in longitudinal direction.
+- The latitudinal extent of the data, i.e., the number of grid-cells or pixel
+  in latitudinal direction.
+- The longitudinal position of the lower left corner of the image and, hence,
+  also the lower left corner of of the lower left pixel.
+- The latitudinal position of the lower left corner of the image and, hence,
+  also the lower left corner of of the lower left pixel.
+- The pixel- or cellsize in both, latitudinal and longitudinal, directions
+  (measured in radiants). For the 30 arc-second resolution this value should
+  correspond to 1/120.
+- The value indicating if a pixel or grid-cell is outside the considered
+  country (usually -2).
+- The value indicating if a pixel or grid-cell has no data but is located
+  inside the considered country (usually -1).
+
+The following *nrows* lines hold the data in a compressed format. The line
+
+381x-2.0 1x125.026 498x-2.0
+
+Implies that the corresponding row of a decompressed array holds 381 times a
+-2, 1 time a 125.026 and then again 498 times a -2. The number of multipliers
+must equal the number of columns (ncols in the header). In this example we have
+381+1+498=880=ncols.
+"""
 import os
 import numpy as np
-from .grid import Grid
+from sedac_gpw_parser.grid import Grid
 
 POPULATION_FILE_NAME = "gpw_v4_population_count_rev11_2020_30_sec_{0}.asc"
 POP_OUTPUT_FILE_NAME = "{0}_population.txt"
 
 
 def _decompress(indices):
+    """
+    Convert a str representing a sequence of entries into a list.
+
+    :param indices: One line in the custom input data that represents a
+                    sequence of entries in a list. See module docstring for 
+                    information on the file format.
+    :type indices: str
+
+    :returns: The decompressed list
+    :rtype: list of float
+
+    Examples:
+    >>> _decompress("2x3.0 1x4.2 3x2.0")
+    [3.0, 3.0, 4.2, 2.0, 2.0, 2.0]
+
+    >>> _decompress("3x0 2x5 3x4")
+    [0.0, 0.0, 0.0, 5.0, 5.0, 4.0, 4.0, 4.0]
+    """ 
     decompressed = []
     for entry in indices.split(" "):
         if "x" in entry:
@@ -19,7 +89,36 @@ def _decompress(indices):
 
 
 def _compress(array):
+    """
+    Convert a list or array into a str representing the sequence of elements.
+   
+    If the list contains integer and float values the compressed array may be
+    expressed in terms of integers or floats depending on the type of the first
+    occurence of a number (see the last two examples below for details). Since
+    this function is only meant to be used in conjuction with the _decompress()
+    function this behaviour does not make any difference as _decompress()
+    always returns a list of floats.
 
+    :param array: The uncompressed list
+    :type array: 1d numpy array or list of int or float
+       
+    :returns: The compressed representation of the array as explained in the
+              module docstring. 
+    :rtype: str
+
+    Examples:
+    >>> _compress([3.0, 3.0, 4.2, 2.0, 2.0, 2.0])
+    '2x3.0 1x4.2 3x2.0'
+
+    >>> _compress([0, 0, 0, 5, 5, 4, 4, 4])
+    '3x0 2x5 3x4'
+
+    >>> _compress([0, 0.0, 0, 5, 5, 4, 4, 4])
+    '3x0 2x5 3x4'
+
+    >>> _compress([0.0, 0, 0, 5, 5, 4, 4, 4])
+    '3x0.0 2x5 3x4'
+    """
     indices = ""
 
     start = array[0]
@@ -37,7 +136,7 @@ def _compress(array):
 
 
 class Population(Grid):
-
+    
 
     def __init__(self, country_id, output_folder="output/",
                  population_input_folder="gpw-v4-population-count-rev11_2020_30_sec_asc/",
@@ -69,7 +168,7 @@ class Population(Grid):
 
 
     def population_array(self):
-        
+
         return self._population.copy()
 
     def total_population(self):
@@ -112,14 +211,14 @@ class Population(Grid):
 
 
     def latitude_range(self):
-         
+
         lats = self._llcrnrlat + np.arange(self._nlat) * self._cellsize
 
         return lats
 
 
     def longitude_range(self):
-         
+
         lons = self._llcrnrlon + np.arange(self._nlon) * self._cellsize
 
         return lons

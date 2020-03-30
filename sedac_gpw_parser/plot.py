@@ -26,8 +26,20 @@ def _add_colorbar_axs(fig, plot_axs):
 
 
 class Plot(Population):
+    """Plot population data for a specfied country on a map."""
+
 
     def __init__(self, country_id, plot_folder="./plots/"):
+        """__init__.
+
+        :param country_id: The numeric id of a country in the sedac gpw
+                           population dataset
+        :type country: int
+
+        :param plot_folder: The relative path to the folder in which the plot i
+                            to be saved.
+        :type plot_folder: str
+        """
 
         if plot_folder[-1] != "/":
             plot_folder += "/"
@@ -46,7 +58,21 @@ class Plot(Population):
         self.set_colormap()
 
     def _compute_image_extent(self):
+        """
+        Compute the extent of the final image.
 
+        The extent is given by two points that measure the lower left corner
+        and the upper right corner of the entire image.
+
+                         +-------+ <-- (ur_x, ur_y)
+                         |       |
+                         |       |
+        (ll_x, ll_y) --> +-------+
+
+        The extent is stored as a tuple: (ll_x, ur_x, ll_y, ur_y).
+
+        The coodinates are measured in radiants.
+        """
         data = self._population
         ll_x = self._llcrnrlon
         ll_y = self._llcrnrlat
@@ -58,7 +84,12 @@ class Plot(Population):
 
 
     def _add_padding(self, axs, padding=0.025):
+        """
+        Add some padding around an axis, e.g., a colorbar or plot-axis.
 
+        :param axs: The axs around which the padding shall be added.
+        :type axs: A matplotlib.axis instance.
+        """
         ll_x, ur_x, ll_y, ur_y = self._img_extent
         delta_x = (ur_x - ll_x) * padding
         delta_y = (ur_y - ll_y) * padding
@@ -68,15 +99,30 @@ class Plot(Population):
 
 
     def set_colormap(self, colormap="Purples"):
+        """
+        Set the colormap for plotting.
 
+        :param colormap: One of the standard matplotlib colormaps. See
+                         https://matplotlib.org/examples/color/colormaps_reference.html
+                         for a comprehensive list.
+        :type colormap: str
+        """
         cmap = cm.get_cmap(colormap)
         cmap.set_under('0.8')
-
         self._cmap = cmap
 
 
     def plot(self, title="", show=False):
+        """
+        Plot the population data for the specified country on a map.
 
+        :param title: A title for the plot
+        :type title: str
+
+        :param show: Whether or not to show the plot inline. Set to True if you
+                     use this class within a Jupyter Notebook.
+        :type show: bool
+        """
         data = self._population
 
         ll_x, ur_x, ll_y, ur_y = self._img_extent

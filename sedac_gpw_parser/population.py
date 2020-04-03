@@ -171,6 +171,7 @@ class Population(Grid):
 
         return self._population.copy()
 
+
     def total_population(self):
         population = self._population
         total_population = population[population > 0].sum()
@@ -332,6 +333,7 @@ class Population(Grid):
 
 def main():
     Population(country_id=68)
+
 
 if __name__ == "__main__":
     main()

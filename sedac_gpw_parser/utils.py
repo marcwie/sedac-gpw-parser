@@ -1,8 +1,10 @@
+import os
+
 GRID_FOLDER = "gpw-v4-national-identifier-grid-rev11_30_sec_asc/"
 GRID_LOOKUP = "gpw_v4_national_identifier_grid_rev11_lookup.txt"
+DATA_FOLDER = os.path.expanduser("~") + "/.sedac_gpw_parser/"
 
-
-def id_lookup(searchterm, lookup_file=GRID_FOLDER+GRID_LOOKUP):
+def id_lookup(searchterm, lookup_file=DATA_FOLDER+GRID_FOLDER+GRID_LOOKUP):
 
     success = False
 

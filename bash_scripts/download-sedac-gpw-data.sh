@@ -2,6 +2,8 @@
 
 BASE_URL=https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/
 
+PROJECT_FOLDER=$HOME/.sedac_gpw_parser/
+
 POPULATION_FILE=gpw-v4-population-count-rev11_2020_30_sec_asc.zip 
 POPULATION_MD5_REF=7a5dd42681fa679d147e6bd126d322db
 POPULATION_FOLDER=gpw-v4-population-count-rev11_2020_30_sec_asc
@@ -34,14 +36,14 @@ function clean() {
 function ctrl_c() {
     echo "Keyboard interrupt."
     clean
-    if [ -d $GRID_FOLDER ]
+    if [ -d $PROJECT_FOLDER$GRID_FOLDER ]
     then
-        rm -r $GRID_FOLDER
+        rm -r $PROJECT_FOLDER$GRID_FOLDER
     fi
     
-    if [ -d $POPULATION_FOLDER ]
+    if [ -d $PROJECT_FOLDER$POPULATION_FOLDER ]
     then
-        rm -r $POPULATION_FOLDER
+        rm -r $PROJECT_FOLDER$POPULATION_FOLDER
     fi
     exit
 }
@@ -58,24 +60,29 @@ function get_data() {
     then
         wget --continue --load-cookies ~/.urs_cookies \
             --save-cookies ~/.urs_cookies --keep-session-cookies \
-            --auth-no-challenge -O $GRID_FILE $GRID_URL
+            --auth-no-challenge -O $PROJECT_FOLDER$GRID_FILE $GRID_URL
     fi
     
     if [ $DOWNLOAD_POP == 1 ]
     then
         wget --continue --load-cookies ~/.urs_cookies \
             --save-cookies ~/.urs_cookies --keep-session-cookies \
-            --auth-no-challenge -O $POPULATION_FILE $POPULATION_URL
+            --auth-no-challenge -O $PROJECT_FOLDER$POPULATION_FILE $POPULATION_URL
     fi
 
     clean
 }
 
 
-DOWNLOAD_POP=1
-if [ -e $POPULATION_FILE ]
+if [ ! -d $PROJECT_FOLDER ]
 then
-    POPULATION_MD5=$(md5sum $POPULATION_FILE)
+    mkdir $PROJECT_FOLDER
+fi
+
+DOWNLOAD_POP=1
+if [ -e $PROJECT_FOLDER$POPULATION_FILE ]
+then
+    POPULATION_MD5=$(md5sum $PROJECT_FOLDER$POPULATION_FILE)
     POPULATION_MD5=${POPULATION_MD5:0:32}
     if [ $POPULATION_MD5 = $POPULATION_MD5_REF ]
     then
@@ -85,9 +92,9 @@ then
 fi
 
 DOWNLOAD_GRID=1
-if [ -e $GRID_FILE ]
+if [ -e $PROJECT_FOLDER$GRID_FILE ]
 then
-    GRID_MD5=$(md5sum $GRID_FILE)
+    GRID_MD5=$(md5sum $PROJECT_FOLDER$GRID_FILE)
     GRID_MD5=${GRID_MD5:0:32}
     if [ $GRID_MD5 = $GRID_MD5_REF ]
     then
@@ -103,14 +110,14 @@ then
     get_data
 fi
 
-if [ ! -d $GRID_FOLDER ]
+if [ ! -d $PROJECT_FOLDER$GRID_FOLDER ]
 then
-    unzip $GRID_FILE -d $GRID_FOLDER
+    unzip $PROJECT_FOLDER$GRID_FILE -d $PROJECT_FOLDER$GRID_FOLDER
 fi
 
-if [ ! -d $POPULATION_FOLDER ]
+if [ ! -d $PROJECT_FOLDER$POPULATION_FOLDER ]
 then
-    unzip $POPULATION_FILE -d $POPULATION_FOLDER
+    unzip $PROJECT_FOLDER$POPULATION_FILE -d $PROJECT_FOLDER$POPULATION_FOLDER
 fi
 
 clean

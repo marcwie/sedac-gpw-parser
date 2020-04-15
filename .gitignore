@@ -9,3 +9,4 @@ sedac_gpw_parser.egg-info/
 .eggs/
 build/
 dist/
+examples/.ipynb_checkpoints/

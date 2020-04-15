@@ -13,10 +13,11 @@ for each valid country:
     pipeline.
 """
 import os
-from .plot import Plot
+from sedac_gpw_parser.plot import Plot
 
 COUNTRY_CODES = "gpw-v4-national-identifier-grid-rev11_30_sec_asc/"\
         "gpw_v4_national_identifier_grid_rev11_lookup.txt"
+DATA_FOLDER = os.path.expanduser("~") + "/.sedac_gpw_parser/"
 
 def main():
     """
@@ -24,7 +25,7 @@ def main():
 
     Two output files and one plot are created for each country.
     """
-    with open(COUNTRY_CODES, "r") as infile:
+    with open(DATA_FOLDER+COUNTRY_CODES, "r") as infile:
         infile.readline()
         info = [(int(_l.split("\t")[0]), _l.split("\t")[3]) for _l in infile]
 

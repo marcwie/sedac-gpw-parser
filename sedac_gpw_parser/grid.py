@@ -39,6 +39,8 @@ import numpy as np
 GRID_FILENAME = "gpw_v4_national_identifier_grid_rev11_30_sec_{0}.asc"
 COUNTRY_COORDS_FILENAME = "{0}_valid_indices.txt"
 FILE_INDEX_NAME = "file_index.txt"
+DATA_FOLDER = os.path.expanduser("~") + "/.sedac_gpw_parser/"
+
 
 def _compress(array):
     """
@@ -140,8 +142,8 @@ class Grid():
     version of a per-country grid to disk for later use.
     """
     def __init__(
-            self, country_id, output_folder="output/",
-            input_folder="gpw-v4-national-identifier-grid-rev11_30_sec_asc/",
+            self, country_id, output_folder=DATA_FOLDER+"output/",
+            input_folder=DATA_FOLDER+"gpw-v4-national-identifier-grid-rev11_30_sec_asc/",
             overwrite=False):
         """Initialize an instance of Grid.
 

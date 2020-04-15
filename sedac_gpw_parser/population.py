@@ -56,7 +56,7 @@ from sedac_gpw_parser.grid import Grid
 
 POPULATION_FILE_NAME = "gpw_v4_population_count_rev11_2020_30_sec_{0}.asc"
 POP_OUTPUT_FILE_NAME = "{0}_population.txt"
-
+DATA_FOLDER = os.path.expanduser("~") + "/.sedac_gpw_parser/"
 
 def _decompress(indices):
     """
@@ -138,9 +138,9 @@ def _compress(array):
 class Population(Grid):
     
 
-    def __init__(self, country_id, output_folder="output/",
-                 population_input_folder="gpw-v4-population-count-rev11_2020_30_sec_asc/",
-                 grid_input_folder="gpw-v4-national-identifier-grid-rev11_30_sec_asc/",
+    def __init__(self, country_id, output_folder=DATA_FOLDER+"output/",
+                 population_input_folder=DATA_FOLDER+"gpw-v4-population-count-rev11_2020_30_sec_asc/",
+                 grid_input_folder=DATA_FOLDER+"gpw-v4-national-identifier-grid-rev11_30_sec_asc/",
                  overwrite=False):
 
         assert not overwrite, "Not implemented yet!"

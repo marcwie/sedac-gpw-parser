@@ -35,15 +35,17 @@ python setup.py install
     python -m "sedac_gpw_parser.run"
     ```
 
-    `download-sedac-gpw-data.sh` downloads the necessary data. The script prompts for your EarthData login credentials. Note that the script temporarily writes your password in plain text to `~/.netrc` in your home folder. However, the file is removed right after the scripts succesfully exits or in case of a keyboard interrupt. 
+    `download-sedac-gpw-data.sh` downloads the necessary data and stores them in a special folder `.sedac_gpw_parser` in your home directory. That way you can access the data from anywhere. The script prompts for your EarthData login credentials. Note that the script temporarily writes your password in plain text to `~/.netrc` in your home folder. However, the file is removed right after the scripts succesfully exits or in case of a keyboard interrupt. 
     
     **Note**: In some cases `download-sedac-gpw-data.sh` has proven to be error prone. See [below](#known-issues) for how to retrieve the input files manually.
 
     `python -m "sedac_gpw_parser.run"` prepares the data for later use for each of the 245 countries that are present in the data-set. For each country it creates three files:
     
-    - `COUNTRYID_valid_indices.txt` that stores the rows and columns of the original input files (and their underlying grid) that contain information on the country specified by the corresponding `COUNTRY_ID`
-    - `COUNTRYID_poulation.txt` stores the total population at each valid grid cell
-    - `COUNTRYID.png` shows the data on a map
+    - `$HOME/.sedac_gpw_parser/output/COUNTRYID_valid_indices.txt` that stores the rows and columns of the original input files (and their underlying grid) that contain information on the country specified by the corresponding `COUNTRY_ID`
+    - `$HOME/.sedac_gpw_parser/output/COUNTRYID_poulation.txt` stores the total population at each valid grid cell
+    - `COUNTRYID.png` shows the data on a map (all plots are put in a folder `plots` in your `workdir`)
+    
+    Usually you do not need to worry about the first two output files. They just live in your `home` folder and you can access them by using the classes `Grid` and `Population` that are provided with this package. You can specify alternative locations for these output files when initializing `Grid` or `Population` (see the docstrings in `grid.py` and `population.py` for details).
 
 3. If you want to work with the population data by, e.g., doing further analysis and evaluation, you can get a 2d `numpy` array of the data and the ranges of covered latitudes and longitudes by using the following snippet:
     ```python
@@ -88,9 +90,9 @@ python setup.py install
 
 # Known issues
 
-1. For some reason the script `download-sedac-gpw-data.sh` has proven to be error prone on some systems. Instead of using the script you can prepare your working directory like so:
+1. For some reason the script `download-sedac-gpw-data.sh` has proven to be error prone on some systems. Instead of using the script you can prepare the raw input data like so:
     ```
-    mkdir workdir
+    mkdir $HOME/.sedac_gpw_parser
     ```
     Then open your browser and log in to https://urs.earthdata.nasa.gov/. Don't close your browser and keep logged in.
     Follow the two links below to download the necessary input files:
@@ -98,13 +100,13 @@ python setup.py install
     - https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-count-rev11/gpw-v4-population-count-rev11_2020_30_sec_asc.zip
     - https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-national-identifier-grid-rev11/gpw-v4-national-identifier-grid-rev11_30_sec_asc.zip
     
-    Make sure to download both files into your `workdir`. 
+    Make sure to download both files into `$HOME/.sedac_gpw_parser`. 
     
-    You should then be able to `cd` into your `workdir` and run `download-sedac-gpw-data.sh` to extract the files into the required structure. 
+    You should then be able to `cd` into `$HOME/.sedac_gpw_parser` and run `download-sedac-gpw-data.sh` to extract the files into the required structure. 
     
     You can also extract both `.zip`-files manually and confirm that the extracted file structure looks like so:
     ```
-    workdir/
+    $HOME/.sedac_gpw_parser/
     ├── gpw-v4-national-identifier-grid-rev11_30_sec_asc
     │   ├── gpw_v4_national_identifier_grid_rev11_30_sec_1.asc
     │   ├── gpw_v4_national_identifier_grid_rev11_30_sec_1.prj

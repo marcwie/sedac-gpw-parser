@@ -8,6 +8,10 @@ def id_lookup(searchterm, lookup_file=DATA_FOLDER+GRID_FOLDER+GRID_LOOKUP):
 
     success = False
 
+    names_ids = []
+    
+    searchterm = searchterm.lower().replace(" ", "")
+
     with open(lookup_file, "r") as infile:
         infile.readline()
 
@@ -19,6 +23,9 @@ def id_lookup(searchterm, lookup_file=DATA_FOLDER+GRID_FOLDER+GRID_LOOKUP):
             if searchterm.lower() in country_name.lower().replace(" ", ""):
                 print(country_name, ":", country_id)
                 success = True
+                names_ids.append((country_name, int(country_id)))
 
     if not success:
         print("No country found for search term:", searchterm)
+
+    return names_ids

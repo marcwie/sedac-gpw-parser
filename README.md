@@ -88,6 +88,8 @@ python setup.py install
     ```
     You can use `plt.plot(show=True)` instead of `plt.plot()` if you want to display the figure in a `jupyter notebook`.
 
+5. See also the provided `Jupyter Notebook` in the `examples` folder for more information and details
+
 # Known issues
 
 1. For some reason the script `download-sedac-gpw-data.sh` has proven to be error prone on some systems. Instead of using the script you can prepare the raw input data like so:

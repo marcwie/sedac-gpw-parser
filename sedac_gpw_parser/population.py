@@ -164,24 +164,24 @@ class Population(Grid):
         print("Loading population...")
         self.load_compressed_population()
 
-        #print("Total population:", self.total_population())
+        print("Total population:", self.total_population())
 
 
     def population_array(self):
 
-        return self._population.copy()
+        return self._population
 
 
     def total_population(self):
-        population = self._population
-        total_population = population[population > 0].sum()
 
-        return total_population
+        return self._total_population
 
 
     def load_compressed_population(self):
 
         input_file = self._population_output_path
+
+        total_population = 0
 
         population = []
 
@@ -200,14 +200,15 @@ class Population(Grid):
 
             for _ in range(n_row):
                 indices = infile.readline()
-                decompressed = _decompress(indices)
-                population[_] = np.array(decompressed)
+                decompressed = np.array(_decompress(indices))
+                population[_] = decompressed
+                total_population += decompressed[decompressed > 0].sum()
                 print(_, end="\r")
 
         self._nlat = n_row
         self._nlon = n_col
         self._population = population
-
+        self._total_population = total_population
         print("Done..")
 
 
@@ -248,6 +249,14 @@ class Population(Grid):
 
         with open(output_filepath, "w") as outfile:
             outfile.write(outstring)
+
+
+    def mask_invalid_data(self, below=0):
+
+        
+        for i, _pop in enumerate(self._population):
+            nan_pop = self._population[i] < below
+            self._population[i][nan_pop] = np.nan
 
 
     def parse_population(self, accuracy=3):
@@ -332,7 +341,9 @@ class Population(Grid):
 
 
 def main():
-    Population(country_id=68)
+    pop = Population(country_id=68)
+    pop.mask_invalid_data(below=0)
+    print(pop.population_array()[0][pop._invalid_values[0]])
 
 
 if __name__ == "__main__":

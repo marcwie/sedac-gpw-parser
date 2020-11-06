@@ -55,7 +55,14 @@ python setup.py install
     latitudes = pop.latitude_range()
     longitudes = pop.longitude_range()
     ```
-    
+  
+5. Sometimes you need to export your data as a table where each row contains the longitude, latitude and corresponding population of one particular grid cell. You can do this like so:
+    ```python
+    from sedac_gpw_parser import population
+    pop = population.Population(country_id=250)
+    table = pop.as_list()
+    ```
+ 
 4. Note that `country_id=250` in the above example returns the data for *France*. If you want to know the `id` of a certain country you can use 
     ```python
     from sedac_gpw_parser import utils

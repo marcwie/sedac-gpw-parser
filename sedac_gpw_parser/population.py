@@ -340,6 +340,19 @@ class Population(Grid):
         self._cellsize = cellsize
 
 
+    def as_list(self, return_invalid=False):
+    
+        n_lat, n_lon = self._population.shape
+        lats = np.repeat(np.flip(self.latitude_range()), n_lon)
+        lons = np.tile(self.longitude_range(), n_lat)
+        table = np.stack((lons, lats, self._population.flatten())).T
+      
+        if not return_invalid:
+            table = table[table[:, 2] > -2]
+
+        return table
+        
+
 def main():
     pop = Population(country_id=68)
     pop.mask_invalid_data(below=0)
